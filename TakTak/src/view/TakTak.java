@@ -2,6 +2,10 @@ package view;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.Icon;
+import java.awt.image.*;
+import java.awt.*;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -19,8 +23,10 @@ import java.awt.Container;
 import javax.swing.border.TitledBorder;
 
 import controller.BoardController;
+import controller.Observer;
+import model.ModelHouse;
 
-public class TakTak extends JFrame {
+public class TakTak extends JFrame implements Observer {
 
   private static final long serialVersionUID = 1L;
   private Player player;
@@ -58,6 +64,8 @@ public class TakTak extends JFrame {
   }
 
   private void initComponents() {
+    controller.addObserver(this);
+
     Container container = this.getContentPane();
     container.setLayout(new BorderLayout());
 
@@ -71,8 +79,11 @@ public class TakTak extends JFrame {
     jtbTabela = new JTable(tableModel);
     jtbTabela.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
+    BoardCellRenderer boardCellRenderer = new BoardCellRenderer();
+    jtbTabela.setDefaultRenderer(Object.class, boardCellRenderer);
+
     jpTabuleiro.add(jtbTabela);
-    jtbTabela.setRowHeight(60);
+    jtbTabela.setRowHeight(83);
 
     jpPontuation = new JPanel();
     jpPontuation.setLayout(new FlowLayout());
@@ -157,6 +168,11 @@ public class TakTak extends JFrame {
     }
   }
 
+  public static void main(String[] args) throws Exception {
+    TakTak frame = new TakTak();
+    frame.setVisible(true);
+  }
+
   private class ActionInitGame extends AbstractAction {
     /**
      *
@@ -170,8 +186,56 @@ public class TakTak extends JFrame {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-      player.initGame();
+      System.out.println("Action Performed of init game");
+      // player.initGame();
+      jtbTabela.setEnabled(true);
+      jtbTabela.setVisible(true);
+      tableModel.createBoard();
+      this.setEnabled(false);
     }
+  }
+
+  @Override
+  public void initBoard(ModelHouse[][] houses) {
+    for (int i = 0; i < 7; i++) {
+      for (int j = 0; j < 6; j++) {
+        String path = houses[i][j].getImagePath();
+        // path = getClass().getResource(path).toString();
+
+        // JLabel l = new JLabel(getIconFromImgPath(path));
+        ImageIcon imgIcon = new ImageIcon(getClass().getResource(path));
+        Image image = imgIcon.getImage();
+        Image newimg = image.getScaledInstance(80, 85, java.awt.Image.SCALE_SMOOTH);
+
+        JLabel l = new JLabel(new ImageIcon(newimg));
+        // JLabel l = new JLabel(
+        // new ImageIcon(new ImageIcon(path).getImage().getScaledInstance(20, 20,
+        // Image.SCALE_DEFAULT)));
+
+        jtbTabela.add(l);
+        System.out.println("URL: " + path + "Value of i: " + i + " - j: " + j + "houses.length" + houses.length);
+        tableModel.setValueAt(l, i, j);
+      }
+    }
+  }
+
+  public Icon getIconFromImgPath(String path) {
+    ImageIcon imageIcon = new ImageIcon(path); // load the image to a imageIcon
+    Image image = imageIcon.getImage();
+    Image newimg = image.getScaledInstance(20, 20, java.awt.Image.SCALE_SMOOTH);
+    return new ImageIcon(newimg);
+  }
+
+  @Override
+  public void notifySelection(int y, int x) {
+    // TODO Auto-generated method stub8
+
+  }
+
+  @Override
+  public void endMatch() {
+    // TODO Auto-generated method stub
+
   }
 
 }

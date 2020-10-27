@@ -20,9 +20,27 @@ public class BoardController implements Observable {
     observers.remove(o);
   }
 
+  public int getQntLine() {
+    if (board == null) {
+      return 0;
+    }
+    return board.getLine();
+  }
+
+  public int getQntColumn() {
+    if (board == null) {
+      return 0;
+    }
+    return board.getColumn();
+  }
+
   public void createBoard() {
     board = ModelBoard.getInstance();
     board.mount();
+
+    for (Observer o : observers) {
+      o.initBoard(board.houses);
+    }
   }
 
 }

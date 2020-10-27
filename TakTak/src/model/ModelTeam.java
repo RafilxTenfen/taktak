@@ -24,6 +24,16 @@ public class ModelTeam {
     this.pieces.add(p);
   }
 
+  public ModelPiece getPiece(int x, int y) {
+    for (ModelPiece p : pieces) {
+      if (p.x == x && p.y == y) {
+        return p;
+      }
+    }
+
+    return null;
+  }
+
   public ModelPiece removePiece(ModelPiece p) {
     for (int i = 0; i < this.pieces.size(); i++) {
       ModelPiece piece = this.pieces.get(i);
