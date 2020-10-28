@@ -2,8 +2,8 @@ package view;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
-import java.awt.image.*;
 import java.awt.*;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -16,22 +16,24 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 
+import java.awt.event.MouseListener;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import javax.swing.border.TitledBorder;
 
-import controller.BoardController;
+import controller.Board;
 import controller.Observer;
 import model.ModelHouse;
+import model.TeamType;
 
 public class TakTak extends JFrame implements Observer {
 
   private static final long serialVersionUID = 1L;
   private Player player;
 
-  private BoardController controller = new BoardController();
+  private Board controller = new Board();
   private BoardModel tableModel;
   private JTable jtbTabela;
 
@@ -84,6 +86,7 @@ public class TakTak extends JFrame implements Observer {
 
     jpTabuleiro.add(jtbTabela);
     jtbTabela.setRowHeight(83);
+    jtbTabela.addMouseListener(new TableMouseListener());
 
     jpPontuation = new JPanel();
     jpPontuation.setLayout(new FlowLayout());
@@ -132,6 +135,44 @@ public class TakTak extends JFrame implements Observer {
 
   public void notify(String notification) {
     JOptionPane.showMessageDialog(null, notification);
+  }
+
+  private class TableMouseListener implements MouseListener {
+
+    @Override
+    public void mouseClicked(java.awt.event.MouseEvent e) {
+      int line = jtbTabela.getSelectedRow();
+      int column = jtbTabela.getSelectedColumn();
+
+      try {
+        System.out.println("Mouse clicked on the board (LINE, COLUMN) = (" + line + ", " + column + ")");
+        controller.boardClicked(line, column);
+      } catch (Exception ex) {
+        System.out.println(ex);
+      }
+
+    }
+
+    @Override
+    public void mousePressed(java.awt.event.MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseReleased(java.awt.event.MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(java.awt.event.MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(java.awt.event.MouseEvent e) {
+
+    }
+
   }
 
   private class ActionConnect extends AbstractAction {
@@ -199,43 +240,52 @@ public class TakTak extends JFrame implements Observer {
   public void initBoard(ModelHouse[][] houses) {
     for (int i = 0; i < 7; i++) {
       for (int j = 0; j < 6; j++) {
-        String path = houses[i][j].getImagePath();
-        // path = getClass().getResource(path).toString();
-
-        // JLabel l = new JLabel(getIconFromImgPath(path));
-        ImageIcon imgIcon = new ImageIcon(getClass().getResource(path));
-        Image image = imgIcon.getImage();
-        Image newimg = image.getScaledInstance(80, 85, java.awt.Image.SCALE_SMOOTH);
-
-        JLabel l = new JLabel(new ImageIcon(newimg));
-        // JLabel l = new JLabel(
-        // new ImageIcon(new ImageIcon(path).getImage().getScaledInstance(20, 20,
-        // Image.SCALE_DEFAULT)));
+        JLabel l = new JLabel(getIcon(houses[i][j]));
 
         jtbTabela.add(l);
-        System.out.println("URL: " + path + "Value of i: " + i + " - j: " + j + "houses.length" + houses.length);
         tableModel.setValueAt(l, i, j);
       }
     }
   }
 
-  public Icon getIconFromImgPath(String path) {
-    ImageIcon imageIcon = new ImageIcon(path); // load the image to a imageIcon
-    Image image = imageIcon.getImage();
-    Image newimg = image.getScaledInstance(20, 20, java.awt.Image.SCALE_SMOOTH);
+  public Icon getIcon(ModelHouse house) {
+    String path = house.getImagePath();
+    ImageIcon imgIcon = new ImageIcon(getClass().getResource(path));
+    Image image = imgIcon.getImage();
+    Image newimg = image.getScaledInstance(80, 85, java.awt.Image.SCALE_SMOOTH);
     return new ImageIcon(newimg);
   }
 
   @Override
-  public void notifySelection(int y, int x) {
-    // TODO Auto-generated method stub8
-
+  public void notifySelection(int line, int column, TeamType type) {
+    System.out.println("Tak Tak notifySelection (LINE, COLUMN) = (" + line + ", " + column + ")");
+    JLabel atual = (JLabel) tableModel.getValueAt(line, column);
+    atual.setBorder(BorderFactory.createLineBorder(Color.red));
+    jtbTabela.repaint();
   }
 
   @Override
   public void endMatch() {
-    // TODO Auto-generated method stub
 
+  }
+
+  @Override
+  public void notifyClearSelection(int line, int column, TeamType type) {
+    JLabel atual = (JLabel) tableModel.getValueAt(line, column);
+    atual.setBorder(BorderFactory.createEmptyBorder());
+  }
+
+  @Override
+  public void notifyMovement(int previousLine, int previousColumn, int line, int column, ModelHouse[][] houses) {
+    updateJLabel(previousLine, previousColumn, houses[previousLine][previousColumn]);
+    updateJLabel(line, column, houses[line][column]);
+    jtbTabela.repaint();
+  }
+
+  public void updateJLabel(int line, int column, ModelHouse house) {
+    JLabel jLabel = (JLabel) tableModel.getValueAt(line, column);
+    jLabel.setIcon(getIcon(house));
+    jLabel.setBorder(BorderFactory.createEmptyBorder());
   }
 
 }

@@ -3,12 +3,12 @@ package view;
 import javax.swing.JLabel;
 import javax.swing.table.DefaultTableModel;
 
-import controller.BoardController;
+import controller.Board;
 
 public class BoardModel extends DefaultTableModel {
 
   private JLabel[][] houses = new JLabel[7][6];
-  private BoardController controller;
+  private Board controller;
 
   /**
    *
@@ -46,7 +46,7 @@ public class BoardModel extends DefaultTableModel {
     fireTableStructureChanged();
   }
 
-  public void setController(BoardController controller) {
+  public void setController(Board controller) {
     this.controller = controller;
   }
 }

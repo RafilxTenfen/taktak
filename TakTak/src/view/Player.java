@@ -70,7 +70,7 @@ public class Player {
 
   public void receivePlay(Play play) {
     // board.receivePlay
-    play.informarSentidoHorario();
+    // play.informarSentidoHorario();
     gui.showCurrentState();
   }
 }

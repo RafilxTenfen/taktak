@@ -6,7 +6,12 @@ import java.util.List;
 public class ModelTeam {
 
   private List<ModelPiece> pieces = new ArrayList<>();
+  public TeamType type;
   private String name;
+
+  public ModelTeam(TeamType type) {
+    this.type = type;
+  }
 
   public String getName() {
     return name;
@@ -24,9 +29,9 @@ public class ModelTeam {
     this.pieces.add(p);
   }
 
-  public ModelPiece getPiece(int x, int y) {
+  public ModelPiece getPiece(int line, int column) {
     for (ModelPiece p : pieces) {
-      if (p.x == x && p.y == y) {
+      if (p.line == line && p.column == column) {
         return p;
       }
     }
