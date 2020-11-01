@@ -3,7 +3,6 @@ package controller;
 import java.util.ArrayList;
 import java.util.List;
 import model.ModelBoard;
-import model.ModelHouse;
 import model.ModelPiece;
 import model.TeamType;
 
@@ -19,6 +18,10 @@ public class Board implements Observable {
 
   public Board() {
     init();
+    // tests
+    this.localPlayer = new Player("local play");
+    this.remotePlayer = new Player("remote play");
+    this.localPlayer.setFirstPlayer();
     this.observers = new ArrayList<Observer>();
   }
 
@@ -62,7 +65,6 @@ public class Board implements Observable {
 
   public void initNewMatch(Integer ordem, String adversaryName) {
     this.clean();
-    localPlayer.init();
     remotePlayer = new Player(adversaryName);
     if (ordem.equals(1))
       localPlayer.setFirstPlayer();
@@ -79,9 +81,31 @@ public class Board implements Observable {
     return remotePlayer;
   }
 
+  public void setCurrentPlayerAttackZone() {
+    getCurrentPlayer().enterAttackZone = true;
+  }
+
+  public boolean bothPlayersEntereredInAttackZone() {
+    return localPlayer.enterAttackZone && remotePlayer.enterAttackZone;
+  }
+
+  public boolean isAnyPieceInTheAttackZone(TeamType type) {
+    for (int i = 2; i <= 4; i++) {
+      for (int j = 0; j < 6; j++) {
+        ModelPiece piece = ModelBoard.getInstance().getPiece(i, j);
+        if (piece != null) {
+          if (piece.getTeam().type == type) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
   public void registerLocalPlayer(String playerName) {
     localPlayer = new Player(playerName);
-    localPlayer.init();
   }
 
   public boolean finishMatch() {
@@ -118,6 +142,38 @@ public class Board implements Observable {
     }
   }
 
+  public void notifyEndGame(Player local, Player loser) {
+    calculatePoints(local);
+    calculatePoints(loser);
+
+    for (Observer o : observers) {
+      o.notifyEndGame(local, loser);
+    }
+  }
+
+  public int calculatePoints(Player p) {
+    // if player is from team black it should calculate
+    // the points in the adversary field
+    int initI = 5;
+    int total = 0;
+
+    if (p.type == TeamType.WHITE) {
+      initI = 0;
+    }
+
+    for (int line = initI; line <= initI + 1; line++) {
+      for (int column = 0; column < 6; column++) {
+        ModelPiece piece = ModelBoard.getInstance().getPiece(line, column);
+        if (piece != null) {
+          total += piece.calculatePoints();
+        }
+      }
+    }
+
+    p.setPoints(total);
+    return total;
+  }
+
   public void notifyClearSelection() {
     if (this.selectedPiece == null) {
       return;
@@ -136,8 +192,8 @@ public class Board implements Observable {
       if (piece != null) { // select one piece
         this.selectPiece(line, column);
         System.out.println("Board boardClicked BEFORE notifySelection (line, column) = (" + line + ", " + column + ")");
-        // this.notifySelection(line, column, getCurrentPlayer().type);
-        this.notifySelection(line, column, TeamType.WHITE); // temp white for tests
+        this.notifySelection(line, column, getCurrentPlayer().type);
+        // this.notifySelection(line, column, TeamType.WHITE); // temp white for tests
       }
 
       return;
@@ -145,15 +201,22 @@ public class Board implements Observable {
     // if a piece is already selected
 
     if (selectedPiece.getLine() == line && selectedPiece.getColumn() == column) {// if selected the same piece again
+      System.out.println("Board boardClicked THE SAME PIECE AGAIN (line, column) = (" + line + ", " + column + ")");
       // clear the selection
-      this.selectedPiece = null;
       this.notifyClearSelection();
+      this.selectedPiece = null;
       return;
     }
 
     if (canMove(this.selectedPiece, line, column)) {
       int previousLine = this.selectedPiece.getLine();
       int previousColumn = this.selectedPiece.getColumn();
+
+      if (!getCurrentPlayer().enterAttackZone) {
+        if (isAttackZone(line) && this.selectedPiece.getTeam().type == getCurrentPlayer().type) {
+          setCurrentPlayerAttackZone();
+        }
+      }
 
       if (ModelBoard.getInstance().getPiece(line, column) != null) { // if exists a piece in the selected place on board
         movePiece(selectedPiece, ModelBoard.getInstance().getPiece(line, column));
@@ -165,12 +228,41 @@ public class Board implements Observable {
           + "(previousLine, previousColumn) = (" + previousLine + ", " + previousColumn + ")");
       this.selectedPiece = null;
       notifyMovement(previousLine, previousColumn, line, column);
+
+      // verify end game 2 players already entered the attack zone at least one time,
+      // but there is no
+      // piece in the attack zone from their team type
+      System.out.println("Board boardClicked BEFORE bothPlayersEntereredInAttackZone \nlocal enter attack: "
+          + this.localPlayer.enterAttackZone + "\nremote enter attack: " + this.remotePlayer.enterAttackZone);
+      if (bothPlayersEntereredInAttackZone()) {
+        System.out.println("Board boardClicked bothPlayersEntereredInAttackZone()");
+
+        if (!isAnyPieceInTheAttackZone(this.localPlayer.type)) {
+          System.out.println(
+              "Board boardClicked bothPlayersEntereredInAttackZone() isAnyPieceInTheAttackZone(this.localPlayer.type) - "
+                  + localPlayer.type.str());
+          notifyEndGame(this.localPlayer, this.remotePlayer);
+        }
+
+        if (!isAnyPieceInTheAttackZone(this.remotePlayer.type)) {
+          System.out.println(
+              "Board boardClicked bothPlayersEntereredInAttackZone() isAnyPieceInTheAttackZone(this.remotePlayer.type) - "
+                  + remotePlayer.type.str());
+          notifyEndGame(this.remotePlayer, this.localPlayer);
+        }
+      }
       return;
     }
 
     System.out.println("Board boardClicked PIECE CAN NOT MOVE (line, column) = (" + line + ", " + column
         + ") - Selected piece name: " + this.selectedPiece.getName() + "(line, column) = ("
         + this.selectedPiece.getLine() + ", " + this.selectedPiece.getColumn() + ")");
+    this.invertTurn();
+  }
+
+  public void invertTurn() {
+    this.localPlayer.invertTurn();
+    this.remotePlayer.invertTurn();
   }
 
   public void movePiece(ModelPiece selectedPiece, ModelPiece pieceAttacked) {
@@ -189,6 +281,7 @@ public class Board implements Observable {
 
   // returns true if the selected piece can move to the selected space
   public static boolean canMove(ModelPiece alreadySelectedPiece, int line, int column) {
+    // verify if it's moving foward
     if (alreadySelectedPiece.getTeam().type == TeamType.WHITE) {
       if (!(line == alreadySelectedPiece.getLine() - 1 && validColumn(alreadySelectedPiece.getColumn(), column))) {
         return false;
@@ -201,9 +294,19 @@ public class Board implements Observable {
 
     ModelPiece piece = ModelBoard.getInstance().getPiece(line, column); // current house selected
     if (piece != null) { // if exists a piece, have to verify if can attack
+      if (alreadySelectedPiece.getTeam().type != piece.getTeam().type) {
+        if (!isAttackZone(line)) { // if is tryng to attack the oponent, it should be in the attack zone
+          System.out.println("Tryng to attack the opponet outside of attack zone");
+          return false;
+        }
+      }
       return ModelPiece.canAttack(alreadySelectedPiece, piece);
     }
     return true;
+  }
+
+  public static boolean isAttackZone(int line) {
+    return line >= 2 && line <= 4;
   }
 
   public static boolean validColumn(int selectedColumn, int column) {

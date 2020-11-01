@@ -67,4 +67,14 @@ public class ModelPiece {
     this.move(piece.line, piece.column);
   }
 
+  public int calculatePoints() {
+    int total = this.points;
+
+    for (ModelPiece p : this.attackedPieces) {
+      total += p.points;
+    }
+
+    return total;
+  }
+
 }

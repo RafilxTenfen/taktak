@@ -72,7 +72,7 @@ public class TakTak extends JFrame implements Observer {
     container.setLayout(new BorderLayout());
 
     jpTabuleiro = new JPanel();
-    jpTabuleiro.setBorder(new TitledBorder("Tabuleiro"));
+    jpTabuleiro.setBorder(new TitledBorder("White vs Black"));
     jpTabuleiro.setLayout(new FlowLayout());
 
     tableModel = new BoardModel();
@@ -88,14 +88,14 @@ public class TakTak extends JFrame implements Observer {
     jtbTabela.setRowHeight(83);
     jtbTabela.addMouseListener(new TableMouseListener());
 
-    jpPontuation = new JPanel();
-    jpPontuation.setLayout(new FlowLayout());
-    jpPontuation.setBorder(new TitledBorder("Pontuation"));
-    jpPontuation.add(pontuationBlack);
-    jpPontuation.add(pontuationWhite);
+    // jpPontuation = new JPanel();
+    // jpPontuation.setLayout(new FlowLayout());
+    // jpPontuation.setBorder(new TitledBorder("Pontuation"));
+    // jpPontuation.add(pontuationBlack);
+    // jpPontuation.add(pontuationWhite);
 
     container.add(BorderLayout.CENTER, jpTabuleiro);
-    container.add(BorderLayout.EAST, jpPontuation);
+    // container.add(BorderLayout.EAST, jpPontuation);
     initMenu();
   }
 
@@ -273,6 +273,7 @@ public class TakTak extends JFrame implements Observer {
   public void notifyClearSelection(int line, int column, TeamType type) {
     JLabel atual = (JLabel) tableModel.getValueAt(line, column);
     atual.setBorder(BorderFactory.createEmptyBorder());
+    jtbTabela.repaint();
   }
 
   @Override
@@ -286,6 +287,12 @@ public class TakTak extends JFrame implements Observer {
     JLabel jLabel = (JLabel) tableModel.getValueAt(line, column);
     jLabel.setIcon(getIcon(house));
     jLabel.setBorder(BorderFactory.createEmptyBorder());
+  }
+
+  @Override
+  public void notifyEndGame(controller.Player local, controller.Player remote) {
+    JOptionPane.showMessageDialog(null, "O Jogo acabou! \n Pontos: \n" + local.type.str() + ": " + local.points + "\n"
+        + remote.type.str() + ": " + remote.points);
   }
 
 }

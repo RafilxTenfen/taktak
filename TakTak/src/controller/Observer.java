@@ -12,5 +12,7 @@ public interface Observer {
 
   public void notifyClearSelection(int line, int column, TeamType type);
 
+  public void notifyEndGame(Player local, Player remote);
+
   public void endMatch();
 }

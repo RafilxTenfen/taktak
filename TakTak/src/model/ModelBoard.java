@@ -27,7 +27,7 @@ public class ModelBoard {
     teamBlack.addPiece(new ModelPiece("black_40_blue", 40, PieceCollor.BLUE, teamBlack, 0, 2, 0, 0, 255)); // blue
     teamBlack.addPiece(new ModelPiece("black_40_green", 40, PieceCollor.GREEN, teamBlack, 0, 3, 0, 128, 0)); // green
     teamBlack.addPiece(new ModelPiece("black_20_blue", 20, PieceCollor.BLUE, teamBlack, 0, 4, 0, 0, 255)); // blue
-    teamBlack.addPiece(new ModelPiece("black_30_green", 30, PieceCollor.BLUE, teamBlack, 0, 5, 0, 0, 255)); // blue
+    teamBlack.addPiece(new ModelPiece("black_30_green", 30, PieceCollor.GREEN, teamBlack, 0, 5, 0, 0, 255)); // blue
 
     // line 1
     teamBlack.addPiece(new ModelPiece("black_10_yellow", 10, PieceCollor.YELLOW, teamBlack, 1, 0, 255, 255, 0)); // yellow
@@ -35,7 +35,7 @@ public class ModelBoard {
     teamBlack.addPiece(new ModelPiece("black_30_blue", 30, PieceCollor.BLUE, teamBlack, 1, 2, 0, 0, 255)); // blue
     teamBlack.addPiece(new ModelPiece("black_20_green", 20, PieceCollor.GREEN, teamBlack, 1, 3, 0, 128, 0)); // green
     teamBlack.addPiece(new ModelPiece("black_10_green", 10, PieceCollor.GREEN, teamBlack, 1, 4, 0, 128, 0)); // green
-    teamBlack.addPiece(new ModelPiece("black_20_yellow", 20, PieceCollor.GREEN, teamBlack, 1, 5, 255, 255, 0)); // green
+    teamBlack.addPiece(new ModelPiece("black_20_yellow", 20, PieceCollor.YELLOW, teamBlack, 1, 5, 255, 255, 0)); // green
 
     return teamBlack;
   }
@@ -48,7 +48,7 @@ public class ModelBoard {
     teamWhite.addPiece(new ModelPiece("white_40_blue", 40, PieceCollor.BLUE, teamWhite, 6, 2, 0, 0, 255)); // blue
     teamWhite.addPiece(new ModelPiece("white_40_green", 40, PieceCollor.GREEN, teamWhite, 6, 3, 0, 128, 0)); // green
     teamWhite.addPiece(new ModelPiece("white_20_blue", 20, PieceCollor.BLUE, teamWhite, 6, 4, 0, 0, 255)); // blue
-    teamWhite.addPiece(new ModelPiece("white_30_green", 30, PieceCollor.BLUE, teamWhite, 6, 5, 0, 0, 255)); // blue
+    teamWhite.addPiece(new ModelPiece("white_30_green", 30, PieceCollor.GREEN, teamWhite, 6, 5, 0, 0, 255)); // blue
 
     // line 5
     teamWhite.addPiece(new ModelPiece("white_10_yellow", 10, PieceCollor.YELLOW, teamWhite, 5, 0, 255, 255, 0)); // yellow
@@ -56,7 +56,7 @@ public class ModelBoard {
     teamWhite.addPiece(new ModelPiece("white_30_blue", 30, PieceCollor.BLUE, teamWhite, 5, 2, 0, 0, 255)); // blue
     teamWhite.addPiece(new ModelPiece("white_20_green", 20, PieceCollor.GREEN, teamWhite, 5, 3, 0, 128, 0)); // green
     teamWhite.addPiece(new ModelPiece("white_10_green", 10, PieceCollor.GREEN, teamWhite, 5, 4, 0, 128, 0)); // green
-    teamWhite.addPiece(new ModelPiece("white_20_yellow", 20, PieceCollor.GREEN, teamWhite, 5, 5, 255, 255, 0)); // green
+    teamWhite.addPiece(new ModelPiece("white_20_yellow", 20, PieceCollor.YELLOW, teamWhite, 5, 5, 255, 255, 0)); // green
 
     return teamWhite;
   }
