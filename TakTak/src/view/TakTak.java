@@ -310,19 +310,17 @@ public class TakTak extends JFrame implements Observer {
     System.out.println("TAKTAK received restart");
 
     ModelBoard.getInstance().reset();
-    // jtbTabela.removeAll();
-    for (int i = 0; i < 7; i++) {
-      for (int j = 0; j < 6; j++) {
-        try {
+    try {
+      for (int i = 0; i < 7; i++) {
+        for (int j = 0; j < 6; j++) {
           JLabel l = new JLabel();
           jtbTabela.add(l);
           tableModel.setValueAt(l, i, j);
-        } catch (Exception e) {
-          // do nothing, jtbTabela.add(l); generate a error
         }
       }
+    } catch (Exception e) {
+      // do nothing, jtbTabela.add(l); generate a error
     }
-    jtbTabela.repaint();
     this.actInitGame.setEnabled(true);
   }
 

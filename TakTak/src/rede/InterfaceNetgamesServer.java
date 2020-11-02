@@ -66,7 +66,7 @@ public class InterfaceNetgamesServer implements OuvidorProxy {
 		try {
 			proxy.iniciarPartida(2);
 		} catch (NaoConectadoException e) {
-			e.printStackTrace();
+			// e.printStackTrace();
 			return false;
 		}
 		return true;
