@@ -1,14 +1,22 @@
-## Getting Started
+## Explain TakTak
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+- An easy explanation can be found on this [video](https://www.youtube.com/watch?v=25FSWXFwLfI)
 
-## Folder Structure
+## How to run
+- Requirements
+  - JAVA 8
+  - JDK 11
+  - java bin in your path enviroment
 
-The workspace contains two folders by default, where:
+- Run the server first
+```shell
+$~ make server-up
+```
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
+- Enter the TakTak directory like `cd ../github.com/RafilxTenfen/taktak/TakTak`
 
-## Dependency Management
+- Run the app
+```shell
+$~ java -Dfile.encoding=UTF-8 @/tmp/cp_5amd97g5269cb4zlh6pnyunsl.argfile App
+```
 
-The `JAVA DEPENDENCIES` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-pack/blob/master/release-notes/v0.9.0.md#work-with-jar-files-directly).
