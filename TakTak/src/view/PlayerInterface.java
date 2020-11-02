@@ -4,20 +4,30 @@ import controller.Board;
 import controller.Play;
 import rede.InterfaceNetgamesServer;
 
-public class Player {
+public class PlayerInterface {
 
   protected InterfaceNetgamesServer ngames;
   protected Board board;
   protected TakTak gui;
 
-  public Player(TakTak game) {
+  public PlayerInterface(TakTak gui) {
+    super();
+    init(gui);
+  }
+
+  public Board getBoard() {
+    return board;
+  }
+
+  private void init(TakTak gui) {
+    this.gui = gui;
     ngames = new InterfaceNetgamesServer();
-    board = new Board();
-    gui = game;
+    board = gui.getController();
+    ngames.setPlayerInterface(this);
   }
 
   public void connect() {
-    boolean conectado = ngames.informarConectado();
+    boolean conectado = ngames.isConnected();
     if (conectado) {
       gui.notify("You are already connected");
       return;
@@ -25,13 +35,17 @@ public class Player {
 
     String player = gui.askPlayerName();
     String servidor = gui.getServerAddress();
-    String notificacao = ngames.conectar(servidor, player);
+    String notificacao = ngames.connect(servidor, player);
     board.registerLocalPlayer(player);
     gui.notify(notificacao);
   }
 
+  public TakTak getGui() {
+    return gui;
+  }
+
   public boolean disconnect() {
-    boolean conectado = ngames.informarConectado();
+    boolean conectado = ngames.isConnected();
     boolean updateGui = false;
     if (conectado) {
       updateGui = board.finishMatch();
@@ -46,31 +60,34 @@ public class Player {
   }
 
   public void newMatch(Integer order, String adversaryName) {
+    System.out.println("newMatch received order: " + order + " adversaryName: " + adversaryName);
+
+    gui.newMatch();
     board.initNewMatch(order, adversaryName);
-    gui.showCurrentState();
   }
 
   public void finishMatch() {
-    gui.notify("Match Finished");
+    board.finishMatchLocally();
+    ngames.finishMatch();
+    gui.notify("Match Finished - Reset!");
+    gui.restart();
   }
 
-  public boolean initGame() {
-    boolean connected = ngames.informarConectado();
-    boolean updateInterface = false;
-
-    if (connected) {
-      updateInterface = board.finishMatch();
-      if (updateInterface)
-        ngames.finishMatch();
+  public void initGame() {
+    if (ngames.isConnected()) {
+      System.out.println("initGame is connected");
       ngames.startMatch();
+    } else {
+      gui.notify("You're not connected");
     }
-
-    return updateInterface;
   }
 
   public void receivePlay(Play play) {
-    // board.receivePlay
-    // play.informarSentidoHorario();
-    gui.showCurrentState();
+    System.out.println("receivePlay received play");
+    board.receivePlay(play);
+  }
+
+  public void sendPlay(Play play) {
+    ngames.enviarJogada(play);
   }
 }

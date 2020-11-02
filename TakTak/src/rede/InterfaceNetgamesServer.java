@@ -1,7 +1,7 @@
 package rede;
 
 import controller.*;
-import view.Player;
+import view.PlayerInterface;
 import br.ufsc.inf.leobr.cliente.Jogada;
 import br.ufsc.inf.leobr.cliente.OuvidorProxy;
 import br.ufsc.inf.leobr.cliente.Proxy;
@@ -15,8 +15,8 @@ public class InterfaceNetgamesServer implements OuvidorProxy {
 
 	private static final long serialVersionUID = 1L;
 	protected Proxy proxy;
-	protected Player player;
-	protected boolean conectado = false;
+	protected PlayerInterface playerInterface;
+	protected boolean connected = false;
 
 	public InterfaceNetgamesServer() {
 		super();
@@ -24,25 +24,33 @@ public class InterfaceNetgamesServer implements OuvidorProxy {
 		proxy.addOuvinte(this);
 	}
 
-	public void definirInterfaceJogador(Player ator) {
-		player = ator;
+	public void setPlayerInterface(PlayerInterface ator) {
+		playerInterface = ator;
 	}
 
-	public String conectar(String servidor, String nome) {
+	public void iniciarPartida() {
+		try {
+			proxy.iniciarPartida(2);
+		} catch (NaoConectadoException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public String connect(String servidor, String nome) {
 		try {
 			proxy.conectar(servidor, nome);
 		} catch (JahConectadoException e) {
 			e.printStackTrace();
-			return "Voce ja esta conectado";
+			return "You're already connected";
 		} catch (NaoPossivelConectarException e) {
 			e.printStackTrace();
-			return "Nao foi possivel conectar";
+			return "It was not possible to connect";
 		} catch (ArquivoMultiplayerException e) {
 			e.printStackTrace();
-			return "Voce esqueceu o arquivo de propriedades";
+			return "You forgot the properties file";
 		}
-		this.definirConectado(true);
-		return "Sucesso: conectado a Netgames Server";
+		this.setConnected(true);
+		return "Sucess: connected at Netgames Server";
 	}
 
 	public void desconectar() {
@@ -51,29 +59,37 @@ public class InterfaceNetgamesServer implements OuvidorProxy {
 		} catch (NaoConectadoException e) {
 			e.printStackTrace();
 		}
-		this.definirConectado(false);
+		this.setConnected(false);
 	}
 
-	public void startMatch() {
+	public boolean startMatch() {
 		try {
 			proxy.iniciarPartida(2);
 		} catch (NaoConectadoException e) {
 			e.printStackTrace();
+			return false;
 		}
+		return true;
 	}
 
 	@Override
 	public void iniciarNovaPartida(Integer position) {
+		System.out.println("iniciarNovaPartida position: " + position);
 		int indiceAdversario = 1;
-		if (position.equals(1))
+		if (position.equals(1)) {
 			indiceAdversario = 2;
+		}
+
+		System.out.println("iniciarNovaPartida BEFORE proxy.obterNomeAdversario");
 		String adversary = proxy.obterNomeAdversario(indiceAdversario);
-		player.newMatch(position, adversary);
+		System.out.println("iniciarNovaPartida AFTER proxy.obterNomeAdversario");
+
+		playerInterface.newMatch(position, adversary);
 	}
 
 	@Override
 	public void finalizarPartidaComErro(String message) {
-		player.finishMatch();
+		System.out.println("InterfaceNetgames finalizarPartidaComErro" + message);
 	}
 
 	@Override
@@ -83,7 +99,7 @@ public class InterfaceNetgamesServer implements OuvidorProxy {
 
 	@Override
 	public void receberJogada(Jogada jogada) {
-		player.receivePlay((Play) jogada);
+		playerInterface.receivePlay((Play) jogada);
 	}
 
 	@Override
@@ -93,6 +109,7 @@ public class InterfaceNetgamesServer implements OuvidorProxy {
 
 	@Override
 	public void tratarPartidaNaoIniciada(String message) {
+		playerInterface.getGui().notify("Game could not be initiated yet");
 		System.out.println("Game not initiated yet");
 	}
 
@@ -104,19 +121,19 @@ public class InterfaceNetgamesServer implements OuvidorProxy {
 		}
 	}
 
-	public boolean informarConectado() {
-		return conectado;
+	public boolean isConnected() {
+		return this.connected;
 	}
 
-	public void definirConectado(boolean valor) {
-		conectado = valor;
+	public void setConnected(boolean valor) {
+		this.connected = valor;
 	}
 
 	public void finishMatch() {
 		try {
 			proxy.finalizarPartida();
 		} catch (Exception e) {
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
 	}
 

@@ -1,6 +1,7 @@
 package controller;
 
 import model.ModelHouse;
+import model.ModelPiece;
 import model.TeamType;
 
 public interface Observer {
@@ -13,6 +14,12 @@ public interface Observer {
   public void notifyClearSelection(int line, int column, TeamType type);
 
   public void notifyEndGame(Player local, Player remote);
+
+  public void setTitleFromPlayers(Player local, Player remote);
+
+  public void notify(String text);
+
+  public void sendPlay(ModelPiece selectedPiece, int line, int column);
 
   public void endMatch();
 }

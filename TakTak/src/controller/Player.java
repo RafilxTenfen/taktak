@@ -18,6 +18,19 @@ public class Player {
     this.points = 0;
   }
 
+  public void init() {
+    this.type = TeamType.BLACK;
+    this.myTurn = false;
+    this.points = 0;
+    this.enterAttackZone = false;
+  }
+
+  public void reset() {
+    this.myTurn = false;
+    this.points = 0;
+    this.enterAttackZone = false;
+  }
+
   public void invertTurn() {
     this.myTurn = !this.myTurn;
   }
@@ -34,5 +47,15 @@ public class Player {
   public void setFirstPlayer() {
     this.myTurn = true;
     this.type = TeamType.WHITE;
+  }
+
+  public void setSecondPlayer() {
+    this.myTurn = false;
+    this.type = TeamType.BLACK;
+  }
+
+  @Override
+  public String toString() {
+    return "Name: " + this.name + " myTurn: " + this.myTurn + " - type: " + this.type.str();
   }
 }

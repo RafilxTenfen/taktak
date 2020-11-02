@@ -1,15 +1,20 @@
 package controller;
 
 import br.ufsc.inf.leobr.cliente.Jogada;
-import model.ModelHouse;
 
 public class Play implements Jogada {
 
   private static final long serialVersionUID = 1L;
-  protected ModelHouse[][] houses;
+  protected int line;
+  protected int column;
+  protected int previousLine;
+  protected int previousColumn;
 
-  public Play(ModelHouse[][] houses) {
-    this.houses = houses;
+  public Play(int line, int column, int previousLine, int previousColumn) {
+    this.line = line;
+    this.column = column;
+    this.previousColumn = previousColumn;
+    this.previousLine = previousLine;
   }
 
 }

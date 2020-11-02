@@ -83,6 +83,12 @@ public class ModelBoard {
 
   }
 
+  public void reset() {
+    this.houses = null;
+    this.teamBlack = null;
+    this.teamWhite = null;
+  }
+
   public ModelHouse getHouse(int line, int column) {
     return houses[line][column];
   }

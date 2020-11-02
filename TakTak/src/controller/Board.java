@@ -13,15 +13,10 @@ public class Board implements Observable {
   protected Player localPlayer;
   protected Player remotePlayer;
   protected ModelPiece selectedPiece;
-  private ModelBoard board;
   private List<Observer> observers;
 
   public Board() {
     init();
-    // tests
-    this.localPlayer = new Player("local play");
-    this.remotePlayer = new Player("remote play");
-    this.localPlayer.setFirstPlayer();
     this.observers = new ArrayList<Observer>();
   }
 
@@ -36,42 +31,45 @@ public class Board implements Observable {
   }
 
   public int getQntLine() {
-    if (board == null) {
-      return 0;
-    }
-    return board.getLine();
+    return ModelBoard.getInstance().getLine();
   }
 
   public int getQntColumn() {
-    if (board == null) {
-      return 0;
-    }
-    return board.getColumn();
+    return ModelBoard.getInstance().getColumn();
   }
 
   public void createBoard() {
-    board = ModelBoard.getInstance();
-    board.mount();
+    ModelBoard.getInstance().mount();
 
     for (Observer o : observers) {
-      o.initBoard(board.houses);
+      o.initBoard(ModelBoard.getInstance().houses);
     }
   }
 
   private void init() {
     matchInProgress = false;
     playInProgress = false;
+    this.selectedPiece = null;
+    if (this.localPlayer != null) {
+      this.localPlayer.reset();
+    }
+    if (this.remotePlayer != null) {
+      this.remotePlayer.reset();
+    }
   }
 
   public void initNewMatch(Integer ordem, String adversaryName) {
     this.clean();
     remotePlayer = new Player(adversaryName);
-    if (ordem.equals(1))
+    if (ordem.equals(1)) {
       localPlayer.setFirstPlayer();
-    else
+      remotePlayer.setSecondPlayer();
+    } else {
       remotePlayer.setFirstPlayer();
+      localPlayer.setSecondPlayer();
+    }
     matchInProgress = true;
-    // this.definirEstadoInicial();
+    notifyTitleFromPlayers();
   }
 
   public Player getCurrentPlayer() {
@@ -111,8 +109,9 @@ public class Board implements Observable {
   public boolean finishMatch() {
     if (matchInProgress) {
       this.finishMatchLocally();
+      return true;
     }
-    return matchInProgress;
+    return false;
   }
 
   public void selectPiece(int line, int column) {
@@ -184,22 +183,53 @@ public class Board implements Observable {
     }
   }
 
+  public void notifyTitleFromPlayers() {
+    System.out.println("Board notifyTitleFromPlayers: " + observers.size());
+
+    for (Observer o : observers) {
+      o.setTitleFromPlayers(this.localPlayer, this.remotePlayer);
+    }
+  }
+
+  public void notifyUser(String text) {
+    for (Observer o : observers) {
+      o.notify(text);
+    }
+  }
+
+  public void notifySendPlay(int line, int column) {
+    for (Observer o : observers) {
+      o.sendPlay(this.selectedPiece, line, column);
+    }
+  }
+
   public void boardClicked(int line, int column) throws Exception {
+    if (!this.localPlayer.myTurn) {
+      notifyUser("Wait for your turn to play");
+      return;
+    }
+
     System.out.println("Board boardClicked (line, column) = (" + line + ", " + column + ")");
-    ModelPiece piece = ModelBoard.getInstance().getHouse(line, column).getPiece();
+    ModelPiece piece = ModelBoard.getInstance().getPiece(line, column);
 
     if (this.selectedPiece == null) { // if none piece was selected
       if (piece != null) { // select one piece
+        if (this.localPlayer.type != piece.getTeam().type) {
+          notifyUser("Select a piece of your side: " + this.localPlayer.type.str());
+          return;
+        }
+
         this.selectPiece(line, column);
         System.out.println("Board boardClicked BEFORE notifySelection (line, column) = (" + line + ", " + column + ")");
-        this.notifySelection(line, column, getCurrentPlayer().type);
-        // this.notifySelection(line, column, TeamType.WHITE); // temp white for tests
+        this.notifySelection(line, column, this.localPlayer.type);
+      } else {
+        notifyUser("Select a piece of the collor: " + this.localPlayer.type.str());
       }
 
       return;
     }
-    // if a piece is already selected
 
+    // if a piece is already selected
     if (selectedPiece.getLine() == line && selectedPiece.getColumn() == column) {// if selected the same piece again
       System.out.println("Board boardClicked THE SAME PIECE AGAIN (line, column) = (" + line + ", " + column + ")");
       // clear the selection
@@ -208,6 +238,16 @@ public class Board implements Observable {
       return;
     }
 
+    if (canMove(this.selectedPiece, line, column)) {
+      notifySendPlay(line, column);
+      if (this.localPlayer.myTurn) {
+        runPlay(line, column);
+      }
+    }
+    return;
+  }
+
+  public void runPlay(int line, int column) {
     if (canMove(this.selectedPiece, line, column)) {
       int previousLine = this.selectedPiece.getLine();
       int previousColumn = this.selectedPiece.getColumn();
@@ -251,13 +291,21 @@ public class Board implements Observable {
           notifyEndGame(this.remotePlayer, this.localPlayer);
         }
       }
+
+      invertTurn();
+      notifyTitleFromPlayers();
       return;
     }
 
     System.out.println("Board boardClicked PIECE CAN NOT MOVE (line, column) = (" + line + ", " + column
         + ") - Selected piece name: " + this.selectedPiece.getName() + "(line, column) = ("
         + this.selectedPiece.getLine() + ", " + this.selectedPiece.getColumn() + ")");
-    this.invertTurn();
+  }
+
+  public void receivePlay(Play p) {
+    this.selectedPiece = ModelBoard.getInstance().getPiece(p.previousLine, p.previousColumn);
+
+    this.runPlay(p.line, p.column);
   }
 
   public void invertTurn() {

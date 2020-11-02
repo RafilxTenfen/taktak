@@ -7,13 +7,18 @@ import controller.Board;
 
 public class BoardModel extends DefaultTableModel {
 
-  private JLabel[][] houses = new JLabel[7][6];
+  private JLabel[][] houses;
   private Board controller;
 
   /**
    *
    */
   private static final long serialVersionUID = 1L;
+
+  public BoardModel(Board controller) {
+    this.houses = new JLabel[7][6];
+    this.controller = controller;
+  }
 
   public int getRowCount() {
     if (controller != null) {
@@ -32,6 +37,8 @@ public class BoardModel extends DefaultTableModel {
 
   public void createBoard() {
     controller.createBoard();
+    System.out
+        .println("BoardModel createBoard getRowCount(): " + getRowCount() + " - getColumnCount():" + getColumnCount());
     fireTableRowsInserted(getRowCount(), getColumnCount());
   }
 

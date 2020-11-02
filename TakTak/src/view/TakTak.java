@@ -25,23 +25,24 @@ import javax.swing.border.TitledBorder;
 
 import controller.Board;
 import controller.Observer;
+import controller.Play;
+import controller.Player;
+import model.ModelBoard;
 import model.ModelHouse;
+import model.ModelPiece;
 import model.TeamType;
 
 public class TakTak extends JFrame implements Observer {
 
   private static final long serialVersionUID = 1L;
-  private Player player;
+  private PlayerInterface playerInterface;
+  private String title;
 
-  private Board controller = new Board();
+  private Board controller;
   private BoardModel tableModel;
   private JTable jtbTabela;
 
-  private JPanel jpPontuation;
   private JPanel jpTabuleiro;
-
-  private JLabel pontuationWhite = new JLabel("White: ");
-  private JLabel pontuationBlack = new JLabel("Black: ");
 
   private final Action actConnect = new ActionConnect();
   private final Action actDisconnect = new ActionDisconnect();
@@ -51,32 +52,33 @@ public class TakTak extends JFrame implements Observer {
     initialize();
   }
 
+  public Board getController() {
+    return controller;
+  }
+
   private void initialize() {
-    this.player = new Player(this);
-    // setSize(900, 700);
+    controller = new Board();
+    controller.addObserver(this);
+
+    this.playerInterface = new PlayerInterface(this);
     setBounds(100, 100, 640, 720);
     getContentPane().setLayout(null);
-    // 7 linhas
-    // 6 colunas
-    // setLocationRelativeTo(null);
     setDefaultCloseOperation(EXIT_ON_CLOSE);
     setResizable(false);
-    setTitle("TakTak");
+    title = "White vs Black";
+
     initComponents();
   }
 
   private void initComponents() {
-    controller.addObserver(this);
-
     Container container = this.getContentPane();
     container.setLayout(new BorderLayout());
 
     jpTabuleiro = new JPanel();
-    jpTabuleiro.setBorder(new TitledBorder("White vs Black"));
+    jpTabuleiro.setBorder(new TitledBorder(title));
     jpTabuleiro.setLayout(new FlowLayout());
 
-    tableModel = new BoardModel();
-    tableModel.setController(controller);
+    tableModel = new BoardModel(controller);
 
     jtbTabela = new JTable(tableModel);
     jtbTabela.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -88,14 +90,7 @@ public class TakTak extends JFrame implements Observer {
     jtbTabela.setRowHeight(83);
     jtbTabela.addMouseListener(new TableMouseListener());
 
-    // jpPontuation = new JPanel();
-    // jpPontuation.setLayout(new FlowLayout());
-    // jpPontuation.setBorder(new TitledBorder("Pontuation"));
-    // jpPontuation.add(pontuationBlack);
-    // jpPontuation.add(pontuationWhite);
-
     container.add(BorderLayout.CENTER, jpTabuleiro);
-    // container.add(BorderLayout.EAST, jpPontuation);
     initMenu();
   }
 
@@ -120,7 +115,9 @@ public class TakTak extends JFrame implements Observer {
   }
 
   public String askPlayerName() {
-    return JOptionPane.showInputDialog("What is your name?");
+    String name = JOptionPane.showInputDialog("What is your name?");
+    setTitle("TakTak game of " + name);
+    return name;
   }
 
   public String getServerAddress() {
@@ -135,6 +132,13 @@ public class TakTak extends JFrame implements Observer {
 
   public void notify(String notification) {
     JOptionPane.showMessageDialog(null, notification);
+  }
+
+  public void newMatch() {
+    jtbTabela.setEnabled(true);
+    jtbTabela.setVisible(true);
+    tableModel.createBoard();
+    this.actInitGame.setEnabled(false);
   }
 
   private class TableMouseListener implements MouseListener {
@@ -188,7 +192,7 @@ public class TakTak extends JFrame implements Observer {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-      player.connect();
+      playerInterface.connect();
     }
   }
 
@@ -205,7 +209,7 @@ public class TakTak extends JFrame implements Observer {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-      player.disconnect();
+      playerInterface.disconnect();
     }
   }
 
@@ -228,24 +232,29 @@ public class TakTak extends JFrame implements Observer {
     @Override
     public void actionPerformed(ActionEvent e) {
       System.out.println("Action Performed of init game");
-      // player.initGame();
-      jtbTabela.setEnabled(true);
-      jtbTabela.setVisible(true);
-      tableModel.createBoard();
       this.setEnabled(false);
+      playerInterface.initGame();
     }
   }
 
   @Override
   public void initBoard(ModelHouse[][] houses) {
+    System.out.println("TakTak initBoard len houses: " + houses.length);
     for (int i = 0; i < 7; i++) {
       for (int j = 0; j < 6; j++) {
-        JLabel l = new JLabel(getIcon(houses[i][j]));
 
-        jtbTabela.add(l);
-        tableModel.setValueAt(l, i, j);
+        try {
+          JLabel l = new JLabel(getIcon(ModelBoard.getInstance().getHouse(i, j)));
+
+          jtbTabela.add(l);
+          System.out.println("TakTak initBoard tableModel: i: " + i + " - j: " + j);
+          tableModel.setValueAt(l, i, j);
+        } catch (Exception e) {
+          // do nothing, jtbTabela.add(l); generate a error
+        }
       }
     }
+    this.actInitGame.setEnabled(false);
   }
 
   public Icon getIcon(ModelHouse house) {
@@ -291,8 +300,52 @@ public class TakTak extends JFrame implements Observer {
 
   @Override
   public void notifyEndGame(controller.Player local, controller.Player remote) {
-    JOptionPane.showMessageDialog(null, "O Jogo acabou! \n Pontos: \n" + local.type.str() + ": " + local.points + "\n"
-        + remote.type.str() + ": " + remote.points);
+    JOptionPane.showMessageDialog(null, "The game is finished! \nPoints: \n" + local.type.str() + ": " + local.points
+        + "\n" + remote.type.str() + ": " + remote.points);
+    System.out.println("notifyEndGame JOptionPane.showMessageDialog");
+    this.playerInterface.finishMatch();
+  }
+
+  public void restart() {
+    System.out.println("TAKTAK received restart");
+
+    ModelBoard.getInstance().reset();
+    // jtbTabela.removeAll();
+    for (int i = 0; i < 7; i++) {
+      for (int j = 0; j < 6; j++) {
+        try {
+          JLabel l = new JLabel();
+          jtbTabela.add(l);
+          tableModel.setValueAt(l, i, j);
+        } catch (Exception e) {
+          // do nothing, jtbTabela.add(l); generate a error
+        }
+      }
+    }
+    jtbTabela.repaint();
+    this.actInitGame.setEnabled(true);
+  }
+
+  @Override
+  public void setTitleFromPlayers(Player local, Player remote) {
+    System.out.println("Taktak setTitleFromPlayers local: ");
+    if (local.myTurn) {
+      this.title = playerTitleTurn(local);
+    } else {
+      this.title = playerTitleTurn(remote);
+    }
+    jpTabuleiro.setBorder(new TitledBorder(title));
+  }
+
+  public String playerTitleTurn(Player p) {
+    return "Player turn: " + p.name + " - Team: " + p.type.str();
+  }
+
+  @Override
+  public void sendPlay(ModelPiece selectedPiece, int line, int column) {
+    System.out.println("TakTak sendPlay (line, column) = (" + line + ", " + column + ")");
+
+    playerInterface.sendPlay(new Play(line, column, selectedPiece.getLine(), selectedPiece.getColumn()));
   }
 
 }
