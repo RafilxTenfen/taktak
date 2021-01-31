@@ -1,8 +1,8 @@
-package view;
+package src.view;
 
-import controller.Board;
-import controller.Play;
-import rede.InterfaceNetgamesServer;
+import src.controller.Board;
+import src.controller.Play;
+import src.rede.InterfaceNetgamesServer;
 
 public class PlayerInterface {
 

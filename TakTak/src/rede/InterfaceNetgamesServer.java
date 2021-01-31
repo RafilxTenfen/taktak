@@ -1,7 +1,7 @@
-package rede;
+package src.rede;
 
-import controller.*;
-import view.PlayerInterface;
+import src.controller.*;
+import src.view.PlayerInterface;
 import br.ufsc.inf.leobr.cliente.Jogada;
 import br.ufsc.inf.leobr.cliente.OuvidorProxy;
 import br.ufsc.inf.leobr.cliente.Proxy;

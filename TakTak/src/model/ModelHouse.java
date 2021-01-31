@@ -1,4 +1,4 @@
-package model;
+package src.model;
 
 public class ModelHouse {
   protected final int line, column, r, g, b;

@@ -1,10 +1,10 @@
-package controller;
+package src.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-import model.ModelBoard;
-import model.ModelPiece;
-import model.TeamType;
+import src.model.ModelBoard;
+import src.model.ModelPiece;
+import src.model.TeamType;
 
 public class Board implements Observable {
 

@@ -1,4 +1,4 @@
-package view;
+package src.view;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -23,14 +23,14 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import javax.swing.border.TitledBorder;
 
-import controller.Board;
-import controller.Observer;
-import controller.Play;
-import controller.Player;
-import model.ModelBoard;
-import model.ModelHouse;
-import model.ModelPiece;
-import model.TeamType;
+import src.controller.Board;
+import src.controller.Observer;
+import src.controller.Play;
+import src.controller.Player;
+import src.model.ModelBoard;
+import src.model.ModelHouse;
+import src.model.ModelPiece;
+import src.model.TeamType;
 
 public class TakTak extends JFrame implements Observer {
 
@@ -299,7 +299,7 @@ public class TakTak extends JFrame implements Observer {
   }
 
   @Override
-  public void notifyEndGame(controller.Player local, controller.Player remote) {
+  public void notifyEndGame(Player local, Player remote) {
     JOptionPane.showMessageDialog(null, "The game is finished! \nPoints: \n" + local.type.str() + ": " + local.points
         + "\n" + remote.type.str() + ": " + remote.points);
     System.out.println("notifyEndGame JOptionPane.showMessageDialog");

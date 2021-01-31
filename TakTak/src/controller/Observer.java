@@ -1,8 +1,8 @@
-package controller;
+package src.controller;
 
-import model.ModelHouse;
-import model.ModelPiece;
-import model.TeamType;
+import src.model.ModelHouse;
+import src.model.ModelPiece;
+import src.model.TeamType;
 
 public interface Observer {
   public void initBoard(ModelHouse[][] houses);

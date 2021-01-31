@@ -1,9 +1,9 @@
-package view;
+package src.view;
 
 import javax.swing.JLabel;
 import javax.swing.table.DefaultTableModel;
 
-import controller.Board;
+import src.controller.Board;
 
 public class BoardModel extends DefaultTableModel {
 

@@ -1,6 +1,6 @@
-package controller;
+package src.controller;
 
-import model.TeamType;
+import src.model.TeamType;
 
 public class Player {
 

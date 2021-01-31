@@ -1,4 +1,4 @@
-package controller;
+package src.controller;
 
 public interface Observable {
   void addObserver(Observer o);

@@ -1,4 +1,4 @@
-package controller;
+package src.controller;
 
 import br.ufsc.inf.leobr.cliente.Jogada;
 
